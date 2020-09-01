@@ -16,8 +16,11 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
     this.global.ArrayBuffer = ArrayBuffer
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await IpfsUtils.createIPFS({
-      Addresses: { Swarm: [] },
-      Bootstrap: [],
+      repo: this.tmpFolder.path + '/ipfs/',
+      config: {
+        Addresses: { Swarm: [] },
+        Bootstrap: [],
+      },
     })
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       stateStorePath: this.tmpFolder.path + '/ceramic/',
