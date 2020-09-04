@@ -20,4 +20,4 @@ Set `jest-environment-ceramic` as Jest `testEnvironment`
 
 ## License
 
-MIT
+Apache-2.0 OR MIT
