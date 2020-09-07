@@ -1,8 +1,33 @@
-const { IpfsUtils } = require('@ceramicnetwork/ceramic-common')
 const Ceramic = require('@ceramicnetwork/ceramic-core').default
+const dagJose = require('dag-jose').default
 const Wallet = require('identity-wallet').default
+const IPFS = require('ipfs')
 const NodeEnvironment = require('jest-environment-node')
+const legacy = require('multiformats/legacy')
+const multiformats = require('multiformats/basics')
 const { dir } = require('tmp-promise')
+
+multiformats.multicodec.add(dagJose)
+
+async function createIPFS(repo) {
+  return await IPFS.create({
+    config: {
+      Addresses: { Swarm: [] },
+      Bootstrap: [],
+    },
+    ipld: { formats: [legacy(multiformats, dagJose.name)] },
+    repo,
+  })
+}
+
+async function createWallet(ceramic, seed) {
+  return await Wallet.create({
+    ceramic,
+    seed,
+    getPermission: () => Promise.resolve([]),
+    useThreeIdProv: false,
+  })
+}
 
 module.exports = class CeramicEnvironment extends NodeEnvironment {
   constructor(config, context) {
@@ -15,22 +40,11 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
     this.global.Uint8Array = Uint8Array
     this.global.ArrayBuffer = ArrayBuffer
     this.tmpFolder = await dir({ unsafeCleanup: true })
-    this.global.ipfs = await IpfsUtils.createIPFS({
-      repo: this.tmpFolder.path + '/ipfs/',
-      config: {
-        Addresses: { Swarm: [] },
-        Bootstrap: [],
-      },
-    })
+    this.global.ipfs = await createIPFS(this.tmpFolder.path + '/ipfs/')
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       stateStorePath: this.tmpFolder.path + '/ceramic/',
     })
-    this.global.wallet = await Wallet.create({
-      ceramic: this.global.ceramic,
-      seed: this.seed,
-      getPermission: () => Promise.resolve([]),
-      useThreeIdProv: false,
-    })
+    this.global.wallet = await createWallet(this.global.ceramic, this.seed)
     await this.global.ceramic.setDIDProvider(this.global.wallet.getDidProvider())
   }
 
