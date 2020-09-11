@@ -11,22 +11,16 @@ multiformats.multicodec.add(dagJose)
 
 async function createIPFS(repo) {
   return await IPFS.create({
-    config: {
-      Addresses: { Swarm: [] },
-      Bootstrap: [],
-    },
+    config: { Bootstrap: [] },
     ipld: { formats: [legacy(multiformats, dagJose.name)] },
+    offline: true,
     repo,
+    silent: true,
   })
 }
 
 async function createWallet(ceramic, seed) {
-  return await Wallet.create({
-    ceramic,
-    seed,
-    getPermission: () => Promise.resolve([]),
-    useThreeIdProv: false,
-  })
+  return await Wallet.create({ ceramic, seed, getPermission: () => Promise.resolve([]) })
 }
 
 module.exports = class CeramicEnvironment extends NodeEnvironment {
