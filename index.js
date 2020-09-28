@@ -1,7 +1,8 @@
 const Ceramic = require('@ceramicnetwork/ceramic-core').default
 const dagJose = require('dag-jose').default
 const Wallet = require('identity-wallet').default
-const IPFS = require('ipfs')
+const Components = require('ipfs/src/core/components')
+const ApiManager = require('ipfs/src/core/api-manager')
 const NodeEnvironment = require('jest-environment-node')
 const legacy = require('multiformats/legacy')
 const multiformats = require('multiformats/basics')
@@ -9,14 +10,34 @@ const { dir } = require('tmp-promise')
 
 multiformats.multicodec.add(dagJose)
 
+function noop() {}
+
 async function createIPFS(repo) {
-  return await IPFS.create({
+  const options = {
     config: { Bootstrap: [] },
     ipld: { formats: [legacy(multiformats, dagJose.name)] },
     offline: true,
     repo,
     silent: true,
-  })
+  }
+
+  const apiManager = new ApiManager()
+  const { api } = apiManager.update(
+    {
+      init: Components.init({ apiManager, print: noop, options }),
+      dns: Components.dns(),
+      isOnline: Components.isOnline({ libp2p: undefined }),
+    },
+    async () => {
+      throw new Error('Not initialized')
+    }
+  )
+
+  const initializedApi = await api.init()
+  const startedApi = await initializedApi.start()
+
+  const { api: ipfs } = apiManager.update({ _isMockFunction: false, ...startedApi })
+  return ipfs
 }
 
 async function createWallet(ceramic, seed) {
@@ -30,9 +51,6 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
   }
 
   async setup() {
-    await super.setup()
-    this.global.Uint8Array = Uint8Array
-    this.global.ArrayBuffer = ArrayBuffer
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await createIPFS(this.tmpFolder.path + '/ipfs/')
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
@@ -43,9 +61,9 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
   }
 
   async teardown() {
+    await super.teardown()
     await this.global.ceramic.close()
     await this.global.ipfs.stop()
     await this.tmpFolder.cleanup()
-    await super.teardown()
   }
 }

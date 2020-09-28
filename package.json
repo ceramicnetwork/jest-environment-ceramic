@@ -20,7 +20,7 @@
     "tmp-promise": "^3.0.2"
   },
   "devDependencies": {
-    "eslint": "^7.9.0",
+    "eslint": "^7.10.0",
     "eslint-config-3box": "^0.1.2",
     "prettier": "^2.1.2"
   }
