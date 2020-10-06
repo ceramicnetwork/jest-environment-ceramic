@@ -1,6 +1,6 @@
 {
   "name": "jest-environment-ceramic",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Ceramic environment for Jest",
   "main": "index.js",
   "files": [],
@@ -11,11 +11,11 @@
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "@ceramicnetwork/ceramic-core": "^0.8.1",
-    "dag-jose": "^0.2.0",
-    "identity-wallet": "^2.0.0-alpha.9",
-    "ipfs": "^0.50.2",
-    "jest-environment-node": "^26.3.0",
+    "@ceramicnetwork/ceramic-core": "^0.9.1-alpha.1",
+    "dag-jose": "^0.3.0",
+    "identity-wallet": "^2.0.0-alpha.11",
+    "ipfs": "github:simonovic86/ipfs",
+    "jest-environment-node": "^26.5.2",
     "multiformats": "^3.0.3",
     "tmp-promise": "^3.0.2"
   },
