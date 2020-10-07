@@ -1,4 +1,5 @@
 const Ceramic = require('@ceramicnetwork/ceramic-core').default
+const { publishIDXConfig } = require('@ceramicstudio/idx-tools')
 const dagJose = require('dag-jose').default
 const Wallet = require('identity-wallet').default
 const Components = require('ipfs/src/core/components')
@@ -56,6 +57,7 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       stateStorePath: this.tmpFolder.path + '/ceramic/',
     })
+    await publishIDXConfig(this.global.ceramic)
     this.global.wallet = await createWallet(this.global.ceramic, this.seed)
     await this.global.ceramic.setDIDProvider(this.global.wallet.getDidProvider())
   }
