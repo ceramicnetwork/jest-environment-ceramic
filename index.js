@@ -1,7 +1,5 @@
 const Ceramic = require('@ceramicnetwork/ceramic-core').default
-const { publishIDXConfig } = require('@ceramicstudio/idx-tools')
 const dagJose = require('dag-jose').default
-const Wallet = require('identity-wallet').default
 const Components = require('ipfs/src/core/components')
 const ApiManager = require('ipfs/src/core/api-manager')
 const NodeEnvironment = require('jest-environment-node')
@@ -41,25 +39,13 @@ async function createIPFS(repo) {
   return ipfs
 }
 
-async function createWallet(ceramic, seed) {
-  return await Wallet.create({ ceramic, seed, getPermission: () => Promise.resolve([]) })
-}
-
 module.exports = class CeramicEnvironment extends NodeEnvironment {
-  constructor(config, context) {
-    super(config, context)
-    this.seed = config.seed || '0x0000000000000000000000000000000000000000000000000000000000000000'
-  }
-
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await createIPFS(this.tmpFolder.path + '/ipfs/')
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       stateStorePath: this.tmpFolder.path + '/ceramic/',
     })
-    await publishIDXConfig(this.global.ceramic)
-    this.global.wallet = await createWallet(this.global.ceramic, this.seed)
-    await this.global.ceramic.setDIDProvider(this.global.wallet.getDidProvider())
   }
 
   async teardown() {

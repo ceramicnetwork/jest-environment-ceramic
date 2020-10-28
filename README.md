@@ -16,7 +16,6 @@ Set `jest-environment-ceramic` as Jest `testEnvironment`
 
 - `ceramic`: Ceramic core instance
 - `ipfs`: IPFS instance
-- `wallet`: IdentityWallet instance
 
 ## License
 
